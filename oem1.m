@@ -152,10 +152,17 @@ function [c, ceq] = constraintFcn(x, cost, budget, infoGain, minInfoGain, accura
     x = round(x);
 
     % Inequality constraints
+    totalSelected = sum(x);
+    if totalSelected > 0
+        avgAccuracy = sum(x .* accuracy) / totalSelected;
+    else
+        avgAccuracy = 0; % Avoid division by zero when no sensors selected
+    end
+
     c = [
         sum(x .* cost) - budget; % Total cost should not exceed budget
         -sum(x .* infoGain) + minInfoGain; % Total information gain should be at least minInfoGain
-        -sum(x .* accuracy) / sum(x) + minAvgAccuracy; % Average accuracy should be at least minAvgAccuracy
+        -avgAccuracy + minAvgAccuracy; % Average accuracy should be at least minAvgAccuracy
         -sum(x .* mtbf) + minTotalMTBF % Total MTBF should be at least minTotalMTBF
     ];
     
